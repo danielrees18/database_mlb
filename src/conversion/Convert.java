@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import bo.FieldingStats;
 import bo.PitchingStats;
 import bo.Player;
 import bo.PlayerSeason;
+import bo.Team;
 import dataaccesslayer.HibernateUtil;
 
 public class Convert {
@@ -27,6 +29,7 @@ public class Convert {
 			long startTime = System.currentTimeMillis();
 			conn = DriverManager.getConnection(MYSQL_CONN_URL);
 			convertPlayers();
+			convertTeams();
 			long endTime = System.currentTimeMillis();
 			long elapsed = (endTime - startTime) / (1000*60);
 			System.out.println("Elapsed time in mins: " + elapsed);
@@ -41,7 +44,35 @@ public class Convert {
 		}
 		HibernateUtil.getSessionFactory().close();
 	}
-		
+
+	public static void convertTeams() {
+		try {
+			PreparedStatement ps = conn.prepareStatement("select " + 
+					"yearID, " + 
+					"lgID, " + 
+					"teamID, " + 
+					"name, " + 
+					"finalGame " +
+					"from Teams");
+			
+			// TODO: Scrape data
+			Team t = new Team();
+			String tid = "";
+			
+			addTeamSeasons(t, tid);
+			
+			HibernateUtil.persistTeam(t);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	private static void addTeamSeasons(Team t, String tid ) {
+		// TODO: scrape seasons
+	}
+	
+	
 	public static void convertPlayers() {
 		try {
 			PreparedStatement ps = conn.prepareStatement("select " + 

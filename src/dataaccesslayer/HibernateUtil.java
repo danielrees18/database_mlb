@@ -10,6 +10,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 import bo.Player;
+import bo.Team;
 
 public class HibernateUtil {
 
@@ -38,6 +39,10 @@ public class HibernateUtil {
 		return sessionFactory;
 	}
 	
+	
+	/*
+	 * READING FROM SQL SERVER FOR WEBSITE
+	 */
 	public static Player retrievePlayerById(Integer id) {
         Player p=null;
 		Session session = HibernateUtil.getSessionFactory().openSession();
@@ -87,12 +92,33 @@ public class HibernateUtil {
 		return list;
 	}
 	
+	
+	/*
+	 * STORAGE TO SQL SERVER
+	 */
 	public static boolean persistPlayer(Player p) {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Transaction tx = session.getTransaction();
 		try {
 			tx.begin();
 			session.save(p);
+			tx.commit();
+		} catch (Exception e) {
+			tx.rollback();
+			e.printStackTrace();
+			return false;
+		} finally {
+			if (session.isOpen()) session.close();
+		}
+		return true;
+	}
+	
+	public static boolean persistTeam(Team t) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = session.getTransaction();
+		try {
+			tx.begin();
+			session.save(t);
 			tx.commit();
 		} catch (Exception e) {
 			tx.rollback();
