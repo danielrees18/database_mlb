@@ -17,6 +17,7 @@ import bo.PitchingStats;
 import bo.Player;
 import bo.PlayerSeason;
 import bo.Team;
+import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
 public class Convert {
@@ -47,29 +48,48 @@ public class Convert {
 
 	public static void convertTeams() {
 		try {
-			PreparedStatement ps = conn.prepareStatement("select " + 
-					"yearID, " + 
-					"lgID, " + 
-					"teamID, " + 
-					"name, " + 
-					"finalGame " +
-					"from Teams");
+			String sql = Team.SQL_SELECT_TEAM;
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
 			
-			// TODO: Scrape data
-			Team t = new Team();
-			String tid = "";
+			while(rs.next()) {
+				Team team = new Team(rs);
+				// Data scrubbing of teams without IDs. Should never happen.
+				if (team.getTeamID() == null || team.getTeamID().isEmpty()) { continue; }
+				
+				// Add all seasons to a team
+				addTeamSeasons(team);
 			
-			addTeamSeasons(t, tid);
+				// Persist team to DB after it has been scraped from MySQL db
+				HibernateUtil.persistTeam(team);
+			}
 			
-			HibernateUtil.persistTeam(t);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private static void addTeamSeasons(Team t, String tid ) {
-		// TODO: scrape seasons
+	private static void addTeamSeasons(Team team) {
+		try {
+			String sql = TeamSeason.SQL_TEAM_SEASON_SELECT + "WHERE teamID = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, team.getTeamID());
+			
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				int seasonYear = rs.getInt("yearID");
+				TeamSeason season = team.getTeamSeason(seasonYear);
+				
+				// If current season isn't already added to team then create new season
+				if(season == null) {
+					season = new TeamSeason(rs, team.getTeamID());
+					team.addSeason(season);	
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
