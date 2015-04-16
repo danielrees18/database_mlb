@@ -1,5 +1,6 @@
 package bo;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -9,7 +10,13 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 
 /**
@@ -25,31 +32,34 @@ import javax.persistence.OneToMany;
  *
  */
 
+@SuppressWarnings("serial")
 @Entity(name = "team")
-public class Team {
+public class Team implements Serializable {
 
 	/**
 	 * SELECT clause for a team's teamID, name, and leageID from the MySQL Teams table, grouped by teamID
 	 */
-	public static String SQL_SELECT_TEAM = "SELECT teamID, name, lgID FROM Teams GROUP BY teamID";
+	public static String SQL_SELECT_TEAM = "SELECT teamID, name, lgID FROM Teams WHERE teamID = 'BOS' or teamID = 'BS1' GROUP BY teamID";
 	
 	
 	// Hibernate variables
-	@Column
-	String teamID;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Integer teamId;
+	
 	@Column
 	String name;
 	@Column
 	String league;
 	
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "year.teamID")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "id.team")
+	@Fetch(FetchMode.JOIN)
 	Set<TeamSeason> seasons = new HashSet<TeamSeason>();
 	
 	
 	// Constructors
 	public Team(ResultSet rs) {
 		try {
-			this.teamID = rs.getString("teamID");
 			this.name = rs.getString("name");
 			this.league = rs.getString("lgID");
 		} catch (SQLException e) {
@@ -61,7 +71,7 @@ public class Team {
 	@Override
 	public int hashCode() {
 		int hash = 0;
-		if(this.teamID != null) hash += this.teamID.hashCode();
+		if(this.teamId != null) hash += this.teamId.hashCode();
 		
 		return hash;
 	}
@@ -72,7 +82,7 @@ public class Team {
 			return false;
 		}
 		Team other = (Team) obj;
-		return this.teamID.equalsIgnoreCase(other.getTeamID());
+		return this.teamId == other.getTeamID();
 	}
 	
 	/**
@@ -91,14 +101,13 @@ public class Team {
 		return null;
 	}
 	
-	
-	// Getters
 	public void addSeason(TeamSeason season) {
 		seasons.add(season);
 	}
 
-	public String getTeamID() {
-		return teamID;
+	// Getters
+	public Integer getTeamID() {
+		return teamId;
 	}
 
 	public String getName() {
@@ -115,8 +124,8 @@ public class Team {
 
 	
 	// Setters
-	public void setTeamID(String teamID) {
-		this.teamID = teamID;
+	public void setTeamID(Integer teamID) {
+		this.teamId = teamID;
 	}
 
 	public void setName(String name) {

@@ -53,28 +53,31 @@ public class Convert {
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()) {
-				Team team = new Team(rs);
-				// Data scrubbing of teams without IDs. Should never happen.
-				if (team.getTeamID() == null || team.getTeamID().isEmpty()) { continue; }
+				String teamID = rs.getString("teamID");
 				
+				// Data scrubbing of teams without IDs. Should never happen.
+				if (teamID == null) { continue; }
+				Team team = new Team(rs);
 				// Add all seasons to a team
-				addTeamSeasons(team);
+				addTeamSeasons(team, teamID);
 			
 				// Persist team to DB after it has been scraped from MySQL db
 				HibernateUtil.persistTeam(team);
 			}
-			
+
+			rs.close();
+			ps.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private static void addTeamSeasons(Team team) {
+	private static void addTeamSeasons(Team team, String tid) {
 		try {
 			String sql = TeamSeason.SQL_TEAM_SEASON_SELECT + "WHERE teamID = ?";
 			PreparedStatement ps = conn.prepareStatement(sql);
-			ps.setString(1, team.getTeamID());
+			ps.setString(1, tid);
 			
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
@@ -83,10 +86,13 @@ public class Convert {
 				
 				// If current season isn't already added to team then create new season
 				if(season == null) {
-					season = new TeamSeason(rs, team.getTeamID());
+					season = new TeamSeason(rs, team);
 					team.addSeason(season);	
 				}
 			}
+			
+			rs.close();
+			ps.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -112,9 +118,9 @@ public class Convert {
 						"birthState, " + 
 						"debut, " + 
 						"finalGame " +
-						"from Master");
-						// for debugging comment previous line, uncomment next line
-						//"from Master where playerID = 'bondsba01' or playerID = 'youklke01';");
+//						"from Master");
+//						 for debugging comment previous line, uncomment next line
+						"from Master where playerID = 'bondsba01' or playerID = 'youklke01';");
 			ResultSet rs = ps.executeQuery();
 			int count=0; // for progress feedback only
 			while (rs.next()) {

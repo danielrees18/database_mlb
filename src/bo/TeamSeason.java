@@ -1,10 +1,15 @@
 package bo;
 
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  * Microsoft SQL Server DDL
@@ -21,8 +26,9 @@ import javax.persistence.Entity;
  *
  */
 
+@SuppressWarnings("serial")
 @Entity(name = "teamseason")
-public class TeamSeason {
+public class TeamSeason implements Serializable {
 	
 	/**
 	 * SELECT clause for a team seasons year, games played, wins, losses, rank, and attendance from the MySQL Teams table
@@ -30,32 +36,67 @@ public class TeamSeason {
 	public static String SQL_TEAM_SEASON_SELECT = "SELECT yearID, G, W, L, Rank, attendance FROM Teams ";
 	
 	
+	/**
+	 * Static class to represent the composite 
+	 * primary key of the TeamSeason entity set
+	 */
+	@Embeddable
+	protected class TeamSeasonId implements Serializable {
+		@ManyToOne
+		@JoinColumn(name = "teamid", referencedColumnName = "teamid", insertable = false, updatable = false)
+		Team team;
+		@Column(name="year")
+		Integer yearId;
+		
+		public TeamSeasonId(Team team, Integer yr) {
+			this.team = team;
+			this.yearId = yr;
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if(!(obj instanceof TeamSeasonId)){
+				return false;
+			}
+			TeamSeasonId other = (TeamSeasonId)obj;
+			return (this.team == other.team &&
+					this.yearId == other.yearId);
+		}
+		 
+		@Override
+		public int hashCode() {
+			Integer hash = 0;
+			if (this.team != null) hash += this.team.hashCode();
+			if (this.yearId != null)   hash += this.yearId.hashCode();
+			return hash;
+		}
+		
+	}
+	
+
 	// Hibernate variables
-	@Column
-	String teamID;
-	@Column
-	Integer year;
+	@EmbeddedId
+	TeamSeasonId id;
 	@Column
 	Integer gamesPlayed;
 	@Column
-	Integer gamesWon;
+	Integer wins;
 	@Column
-	Integer gamesLost;
+	Integer losses;
 	@Column
-	Integer teamRank;
+	Integer rank;
 	@Column
 	Integer totalAttendance;
 	
 	
 	// Constructors
-	public TeamSeason(ResultSet rs, String tid) {
+	public TeamSeason(ResultSet rs, Team team) {
 		try {
-			teamID = tid;
-			year = rs.getInt("yearID");
+			id = new TeamSeasonId(team, rs.getInt("yearID"));
 			gamesPlayed = rs.getInt("G");
-			gamesWon = rs.getInt("W");
-			gamesLost = rs.getInt("L");
-			teamRank = rs.getInt("Rank");
+			wins = rs.getInt("W");
+			losses = rs.getInt("L");
+			rank = rs.getInt("Rank");
 			totalAttendance = rs.getInt("attendance");
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -67,8 +108,8 @@ public class TeamSeason {
 	public int hashCode() {
 		int hash = 0;
 		
-		if(this.teamID != null) hash += this.getTeamID().hashCode();
-		if(this.year != null) 	hash += this.getYear().hashCode();
+		if(this.getTeamID() != null) hash += this.getTeamID().hashCode();
+		if(this.getYear() != null) 	hash += this.getYear().hashCode();
 		
 		return hash;
 	}
@@ -79,17 +120,21 @@ public class TeamSeason {
 			return false;
 		}
 		TeamSeason other = (TeamSeason) obj;
-		return (this.teamID.equalsIgnoreCase(other.getTeamID()) && this.year == other.getYear());
+		return (this.getTeamID() == other.getTeamID() && this.getYear() == other.getYear());
 	}
 	
-	
+	@Override
+	public String toString() {
+		return "teamID: " + this.getTeamID() + " year: " + this.getYear() + " gamesPlayed: " + this.gamesPlayed + " wins: " + wins + " losses: " + losses + " rank: " + rank + " attendance: " + totalAttendance;
+	}
+
 	// Getters
-	public String getTeamID() {
-		return teamID;
+	public Integer getTeamID() {
+		return id.team.getTeamID();
 	}
 
 	public Integer getYear() {
-		return year;
+		return id.yearId;
 	}
 
 	public Integer getGamesPlayed() {
@@ -97,29 +142,33 @@ public class TeamSeason {
 	}
 
 	public Integer getGamesWon() {
-		return gamesWon;
+		return wins;
 	}
 
 	public Integer getGamesLost() {
-		return gamesLost;
+		return losses;
 	}
 
 	public Integer getTeamRank() {
-		return teamRank;
+		return rank;
 	}
 
 	public Integer getTotalAttendance() {
 		return totalAttendance;
 	}
-
-	public void setTeamID(String teamId) {
-		this.teamID = teamId;
+	
+	public TeamSeasonId getTeamSeasonId() {
+		return id;
 	}
 
 	
 	// Setters
+	public void setTeamID(Integer teamId) {
+		this.id.team.setTeamID(teamId);
+	}
+
 	public void setYear(Integer year) {
-		this.year = year;
+		this.id.yearId = year;
 	}
 
 	public void setGamesPlayed(Integer gamesPlayed) {
@@ -127,18 +176,22 @@ public class TeamSeason {
 	}
 
 	public void setGamesWon(Integer gamesWon) {
-		this.gamesWon = gamesWon;
+		this.wins = gamesWon;
 	}
 
 	public void setGamesLost(Integer gamesLost) {
-		this.gamesLost = gamesLost;
+		this.losses = gamesLost;
 	}
 
 	public void setTeamRank(Integer teamRank) {
-		this.teamRank = teamRank;
+		this.rank = teamRank;
 	}
 
 	public void setTotalAttendance(Integer totalAttendance) {
 		this.totalAttendance = totalAttendance;
+	}
+	
+	public void setTeamSeasonId(TeamSeasonId teamSeasonId) {
+		this.id = teamSeasonId;
 	}
 }
