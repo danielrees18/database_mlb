@@ -17,6 +17,7 @@ import bo.PitchingStats;
 import bo.Player;
 import bo.PlayerSeason;
 import bo.Team;
+import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
 public class Convert {
@@ -47,29 +48,54 @@ public class Convert {
 
 	public static void convertTeams() {
 		try {
-			PreparedStatement ps = conn.prepareStatement("select " + 
-					"yearID, " + 
-					"lgID, " + 
-					"teamID, " + 
-					"name, " + 
-					"finalGame " +
-					"from Teams");
+			String sql = Team.SQL_SELECT_TEAM;
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ResultSet rs = ps.executeQuery();
 			
-			// TODO: Scrape data
-			Team t = new Team();
-			String tid = "";
+			while(rs.next()) {
+				String teamID = rs.getString("teamID");
+				
+				// Data scrubbing of teams without IDs. Should never happen.
+				if (teamID == null) { continue; }
+				Team team = new Team(rs);
+				// Add all seasons to a team
+				addTeamSeasons(team, teamID);
 			
-			addTeamSeasons(t, tid);
-			
-			HibernateUtil.persistTeam(t);
+				// Persist team to DB after it has been scraped from MySQL db
+				HibernateUtil.persistTeam(team);
+			}
+
+			rs.close();
+			ps.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private static void addTeamSeasons(Team t, String tid ) {
-		// TODO: scrape seasons
+	private static void addTeamSeasons(Team team, String tid) {
+		try {
+			String sql = TeamSeason.SQL_TEAM_SEASON_SELECT + "WHERE teamID = ?";
+			PreparedStatement ps = conn.prepareStatement(sql);
+			ps.setString(1, tid);
+			
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				int seasonYear = rs.getInt("yearID");
+				TeamSeason season = team.getTeamSeason(seasonYear);
+				
+				// If current season isn't already added to team then create new season
+				if(season == null) {
+					season = new TeamSeason(rs, team);
+					team.addSeason(season);	
+				}
+			}
+			
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -92,9 +118,9 @@ public class Convert {
 						"birthState, " + 
 						"debut, " + 
 						"finalGame " +
-						"from Master");
-						// for debugging comment previous line, uncomment next line
-						//"from Master where playerID = 'bondsba01' or playerID = 'youklke01';");
+//						"from Master");
+//						 for debugging comment previous line, uncomment next line
+						"from Master where playerID = 'bondsba01' or playerID = 'youklke01';");
 			ResultSet rs = ps.executeQuery();
 			int count=0; // for progress feedback only
 			while (rs.next()) {

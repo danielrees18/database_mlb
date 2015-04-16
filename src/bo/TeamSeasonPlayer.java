@@ -1,6 +1,11 @@
 package bo;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 
 /**
@@ -15,7 +20,13 @@ import javax.persistence.Entity;
  *
  */
 
+
+@SuppressWarnings("serial")
 @Entity(name = "teamseasonplayer")
-public class TeamSeasonPlayer {
+public class TeamSeasonPlayer implements Serializable {
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Integer teamSeasonPlayerId;
 
 }
