@@ -75,19 +75,27 @@ public class Convert {
 	
 	private static void addTeamSeasons(Team team, String tid) {
 		try {
-			String sql = TeamSeason.SQL_TEAM_SEASON_SELECT + "WHERE teamID = ?";
+			String sql = TeamSeason.SQL_TEAM_SEASON_SELECT + "WHERE teamID = ? ORDER BY yearID";
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ps.setString(1, tid);
 			
 			ResultSet rs = ps.executeQuery();
 			while(rs.next()) {
+				
 				int seasonYear = rs.getInt("yearID");
 				TeamSeason season = team.getTeamSeason(seasonYear);
 				
 				// If current season isn't already added to team then create new season
 				if(season == null) {
 					season = new TeamSeason(rs, team);
-					team.addSeason(season);	
+					team.addSeason(season);
+					
+					// Set team's start and last year based on order
+					if(rs.isFirst()) {
+						team.setYearFounded(season.getYear());
+					} else if (rs.isLast()) {
+						team.setYearLast(season.getYear());
+					}
 				}
 			}
 			

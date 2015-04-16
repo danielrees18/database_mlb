@@ -51,6 +51,10 @@ public class Team implements Serializable {
 	String name;
 	@Column
 	String league;
+	@Column
+	Integer yearFounded;
+	@Column
+	Integer yearLast;
 	
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "id.team")
 	@Fetch(FetchMode.JOIN)
@@ -121,8 +125,15 @@ public class Team implements Serializable {
 	public Set<TeamSeason> getSeasons() {
 		return seasons;
 	}
-
 	
+	public Integer getYearFounded() {
+		return yearFounded;
+	}
+
+	public Integer getYearLast() {
+		return yearLast;
+	}
+
 	// Setters
 	public void setTeamID(Integer teamID) {
 		this.teamId = teamID;
@@ -139,6 +150,13 @@ public class Team implements Serializable {
 	public void setSeasons(Set<TeamSeason> seasons) {
 		this.seasons = seasons;
 	}
-	
+
+	public void setYearFounded(Integer yearFounded) {
+		this.yearFounded = yearFounded;
+	}
+
+	public void setYearLast(Integer yearLast) {
+		this.yearLast = yearLast;
+	}
 	
 }
