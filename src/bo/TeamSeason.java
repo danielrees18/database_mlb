@@ -3,6 +3,8 @@ package bo;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -70,9 +72,7 @@ public class TeamSeason implements Serializable {
 			if (this.yearId != null)   hash += this.yearId.hashCode();
 			return hash;
 		}
-		
 	}
-	
 
 	// Hibernate variables
 	@EmbeddedId
@@ -88,6 +88,7 @@ public class TeamSeason implements Serializable {
 	@Column
 	Integer totalAttendance;
 	
+	Set<Player> players = new HashSet<Player>();
 	
 	// Constructors
 	public TeamSeason(ResultSet rs, Team team) {
@@ -102,8 +103,12 @@ public class TeamSeason implements Serializable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// Public Methods
+	public void addPlayerToRoster(Player player) {
+		this.players.add(player);
+	}
+	
 	@Override
 	public int hashCode() {
 		int hash = 0;
@@ -123,10 +128,6 @@ public class TeamSeason implements Serializable {
 		return (this.getTeamID() == other.getTeamID() && this.getYear() == other.getYear());
 	}
 	
-	@Override
-	public String toString() {
-		return "teamID: " + this.getTeamID() + " year: " + this.getYear() + " gamesPlayed: " + this.gamesPlayed + " wins: " + wins + " losses: " + losses + " rank: " + rank + " attendance: " + totalAttendance;
-	}
 
 	// Getters
 	public Integer getTeamID() {
@@ -159,6 +160,10 @@ public class TeamSeason implements Serializable {
 	
 	public TeamSeasonId getTeamSeasonId() {
 		return id;
+	}
+	
+	public Set<Player> getRoster() {
+		return players;
 	}
 
 	
@@ -193,5 +198,9 @@ public class TeamSeason implements Serializable {
 	
 	public void setTeamSeasonId(TeamSeasonId teamSeasonId) {
 		this.id = teamSeasonId;
+	}
+	
+	public void setRoster(Set<Player> players) {
+		this.players = players;
 	}
 }

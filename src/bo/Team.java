@@ -39,7 +39,7 @@ public class Team implements Serializable {
 	/**
 	 * SELECT clause for a team's teamID, name, and leageID from the MySQL Teams table, grouped by teamID
 	 */
-	public static String SQL_SELECT_TEAM = "SELECT teamID, name, lgID FROM Teams WHERE teamID = 'BOS' or teamID = 'BS1' GROUP BY teamID";
+	public static String SQL_SELECT_TEAM = "SELECT teamID, name, lgID FROM Teams GROUP BY teamID";// WHERE teamID = 'BOS' or teamID = 'BS1' GROUP BY teamID";
 	
 	
 	// Hibernate variables

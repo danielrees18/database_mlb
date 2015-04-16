@@ -35,6 +35,8 @@ public class Player {
 	@Fetch(FetchMode.JOIN)
 	Set<PlayerSeason> seasons = new HashSet<PlayerSeason>();
 	
+	Set<TeamSeason> teamSeasons = new HashSet<TeamSeason>();
+	
 	@Column
 	String name;
 	@Column
@@ -66,6 +68,10 @@ public class Player {
 	
 	public void addPosition(String p) {
 		positions.add(p);
+	}
+	
+	public void addTeamSeason(TeamSeason season) {
+		this.teamSeasons.add(season);
 	}
 
 	public Set<String> getPositions() {
@@ -133,6 +139,14 @@ public class Player {
 
 	public void setBirthCity(String birthCity) {
 		this.birthCity = birthCity;
+	}
+	
+	public Set<TeamSeason> getTeamSeasons() {
+		return this.teamSeasons;
+	}
+	
+	public void setTeamSeasons(Set<TeamSeason> seasons) {
+		this.teamSeasons = seasons;
 	}
 
 	public String getBirthState() {

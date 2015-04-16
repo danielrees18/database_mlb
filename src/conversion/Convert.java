@@ -29,7 +29,7 @@ public class Convert {
 		try {
 			long startTime = System.currentTimeMillis();
 			conn = DriverManager.getConnection(MYSQL_CONN_URL);
-			convertPlayers();
+//			convertPlayers();
 			convertTeams();
 			long endTime = System.currentTimeMillis();
 			long elapsed = (endTime - startTime) / (1000*60);
@@ -52,7 +52,13 @@ public class Convert {
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
 			
+			int count=0; // for progress feedback only
 			while(rs.next()) {
+				count++;
+				// this just gives us some progress feedback
+				if (count % 100 == 0) System.out.println("num teams: " + count);
+				
+				
 				String teamID = rs.getString("teamID");
 				
 				// Data scrubbing of teams without IDs. Should never happen.
@@ -93,7 +99,9 @@ public class Convert {
 					// Set team's start and last year based on order
 					if(rs.isFirst()) {
 						team.setYearFounded(season.getYear());
-					} else if (rs.isLast()) {
+					}
+					
+					if (rs.isLast()) {
 						team.setYearLast(season.getYear());
 					}
 				}
@@ -134,7 +142,7 @@ public class Convert {
 			while (rs.next()) {
 				count++;
 				// this just gives us some progress feedback
-				if (count % 100 == 0) System.out.println("num players: " + count);
+				if (count % 1000 == 0) System.out.println("num players: " + count);
 				String pid = rs.getString("playerID");
 				String firstName = rs.getString("nameFirst");
 				String lastName = rs.getString("nameLast");
