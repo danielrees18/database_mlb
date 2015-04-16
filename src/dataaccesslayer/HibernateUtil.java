@@ -12,11 +12,18 @@ import org.hibernate.cfg.Configuration;
 import bo.Player;
 import bo.Team;
 
+/**
+ * Daniel Rees
+ * Andrei Popa
+ * Database CS3610 Final Project
+ *
+ */
 public class HibernateUtil {
 
 	private static final SessionFactory sessionFactory;
 
 	static {
+	
 		try {
 			Configuration cfg = new Configuration()
 				.addAnnotatedClass(bo.Player.class)
@@ -27,7 +34,6 @@ public class HibernateUtil {
 				.addAnnotatedClass(bo.PitchingStats.class)
 				.addAnnotatedClass(bo.Team.class)
 				.addAnnotatedClass(bo.TeamSeason.class)
-				.addAnnotatedClass(bo.TeamSeasonPlayer.class)
 				.configure();
 			StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().
 					applySettings(cfg.getProperties());
