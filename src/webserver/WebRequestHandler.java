@@ -50,7 +50,7 @@ class WebRequestHandler implements Runnable {
     	if (urlName==null) return;
         if (urlName.contains(SERVER_PAGE_EXT)) {
             System.out.println("generating contents for: " + urlName);
-            String ssp = urlName.substring(0, urlName.indexOf(SERVER_PAGE_EXT));
+            String ssp = urlName.substring(0, urlName.indexOf(SERVER_PAGE_EXT)); 
             BaseController serverApp = ControllerFactory.getServerApp(ssp);
             if (serverApp != null) {
                 serverApp.init(query);

@@ -94,6 +94,75 @@ public class HibernateUtil {
 		return list;
 	}
 	
+	public static Team retrieveTeamById(Integer id) {
+        Team t=null;
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = session.getTransaction();
+		try {
+			tx.begin();
+			org.hibernate.Query query;
+			query = session.createQuery("from bo.Player where id = :id ");
+		    query.setParameter("id", id);
+		    if (query.list().size()>0) {
+		    	t = (Team) query.list().get(0);
+		    	Hibernate.initialize(t.getSeasons());
+		    }
+			tx.commit();
+		} catch (Exception e) {
+			tx.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session.isOpen()) session.close();
+		}
+		return t;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static List<Team> retrieveTeamsByName(String nameQuery, Boolean exactMatch) {
+        List<Team> list=null;
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = session.getTransaction();
+		try {
+			tx.begin();
+			org.hibernate.Query query;
+			if (exactMatch) {
+				query = session.createQuery("from bo.Team where name = :name ");
+			} else {
+				query = session.createQuery("from bo.Team where name like '%' + :name + '%' ");
+			}
+		    query.setParameter("name", nameQuery);
+		    list = query.list();
+			tx.commit();
+		} catch (Exception e) {
+			tx.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session.isOpen()) session.close();
+		}
+		return list;
+	}
+	
+	@SuppressWarnings("unchecked") // ***need to make sure query is correct. Check columns in db
+	public static List<Team> retrieveTeamSeasonByTeamIdAndYear(String idQuery, String yearQuery) {
+        List<Team> list=null;
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		Transaction tx = session.getTransaction();
+		try {
+			tx.begin();
+			org.hibernate.Query query;
+			query = session.createQuery("from bo.TeamSeason where id = :id and year = :year ");
+		    query.setParameter("id", idQuery);
+		    query.setParameter("year", yearQuery);
+		    list = query.list();
+			tx.commit();
+		} catch (Exception e) {
+			tx.rollback();
+			e.printStackTrace();
+		} finally {
+			if (session.isOpen()) session.close();
+		}
+		return list;
+	}
 	
 	/*
 	 * STORAGE TO SQL SERVER
