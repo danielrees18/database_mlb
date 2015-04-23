@@ -7,10 +7,10 @@
 <session-factory>
 <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
 <!-- LINUX -->
-<property name="hibernate.connection.url">jdbc:sqlserver://172.16.107.143:1433;database=MLB</property>
+<!-- <property name="hibernate.connection.url">jdbc:sqlserver://172.16.107.143:1433;database=MLB</property> -->
 <!-- WINDOWS -->
-<!-- <property name="hibernate.connection.url">jdbc:sqlserver://192.168.6.130:1433;database=MLB</property> -->
-<property name="hibernate.connection.username">susie</property>
+ <property name="hibernate.connection.url">jdbc:sqlserver://192.168.129.130:1433;database=MLB</property> 
+<property name="hibernate.connection.username">j</property>
 <property name="hibernate.connection.password">password</property>
 <property name="hibernate.connection.pool_size">1</property>
 <property name="hibernate.default_catalog">dbo</property>
