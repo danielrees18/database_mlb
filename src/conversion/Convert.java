@@ -61,19 +61,8 @@ public class Convert {
 	
 	private static void startConversion() {
 		convertTeams();
-		convertPlayers();
+//		convertPlayers();
 		persistTeams();
-	}
-	
-	
-	private static Team getTeamWithID(String tid) {
-		for(String key : teams.keySet()) {
-			Team team = teams.get(key);
-			if(team.hasTeamID(tid)) {
-				return team;
-			}
-		}
-		return null;
 	}
 
 	private static void convertTeams() {
@@ -83,17 +72,14 @@ public class Convert {
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()) {
-				String franchID = rs.getString("franchID");
 				String teamID = rs.getString("teamID");
-				Team team = teams.get(franchID);
+				Team team = teams.get(teamID);
 				if(team == null) {
 					team = new Team(rs);
-				} else {
-					team.addTeamID(teamID);
 				}
 				
 				addTeamSeasons(team, teamID);
-				teams.put(franchID, team);
+				teams.put(teamID, team);
 			}
 
 			rs.close();
@@ -281,7 +267,7 @@ public class Convert {
 					 * Here we are setting the relation of teamseasonplayer
 					 */
 					String tid = rs.getString("teamID");
-					Team team = getTeamWithID(tid);
+					Team team = teams.get(tid);
 					if(team != null) {
 						TeamSeason ts = team.getTeamSeason(yid);
 						ts.addPlayerToRoster(p);
