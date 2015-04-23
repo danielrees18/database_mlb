@@ -7,28 +7,22 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
 /**
- * Microsoft SQL Server DDL
- * 
- * create table teamseason (
- *	teamId			numeric(10,0)	references team on delete cascade,
- *	year			numeric(4,0),
- *	gamesPlayed		numeric(3,0),
- *	wins			numeric(4,0),
- *	losses			numeric(4,0),
- *	rank			numeric(2,0),
- *	totalAttendance numeric(7,0),
- *	primary key (teamId, year));
+ * Daniel Rees
+ * Andrei Popa
+ * Database CS3610 Final Project
  *
  */
-
 @SuppressWarnings("serial")
 @Entity(name = "teamseason")
 public class TeamSeason implements Serializable {
@@ -36,8 +30,7 @@ public class TeamSeason implements Serializable {
 	/**
 	 * SELECT clause for a team seasons year, games played, wins, losses, rank, and attendance from the MySQL Teams table
 	 */
-	public static String SQL_TEAM_SEASON_SELECT = "SELECT yearID, G, W, L, Rank, attendance FROM Teams ";
-	
+	public static String SQL_TEAM_SEASON_SELECT = "SELECT name, yearID, G, W, L, Rank, attendance FROM Teams ";
 	
 	/**
 	 * Static class to represent the composite 
@@ -46,7 +39,7 @@ public class TeamSeason implements Serializable {
 	@Embeddable
 	protected class TeamSeasonId implements Serializable {
 		@ManyToOne
-		@JoinColumn(name = "teamid", referencedColumnName = "teamid", insertable = false, updatable = false)
+		@JoinColumn(name = "teamId", referencedColumnName = "teamId", insertable = false, updatable = false)
 		Team team;
 		@Column(name="year")
 		Integer yearId;
@@ -89,7 +82,21 @@ public class TeamSeason implements Serializable {
 	@Column
 	Integer totalAttendance;
 	
+	/**
+	 * Set up the Many-to-Many association table relationship between
+	 * a team season and a player.
+	 */
+	@ManyToMany(cascade = CascadeType.ALL)
+	@JoinTable(
+		name="teamseasonplayer",
+		joinColumns = {
+			@JoinColumn(name="year", referencedColumnName="year"),
+			@JoinColumn(name="teamId", referencedColumnName="teamId")
+		},
+		inverseJoinColumns = @JoinColumn(name="playerId", referencedColumnName="playerId")
+	)	
 	Set<Player> players = new HashSet<Player>();
+	
 	
 	// Constructors
 	public TeamSeason(ResultSet rs, Team team) {
@@ -105,6 +112,7 @@ public class TeamSeason implements Serializable {
 		}
 	}
 
+	
 	// Public Methods
 	public void addPlayerToRoster(Player player) {
 		this.players.add(player);
@@ -166,7 +174,6 @@ public class TeamSeason implements Serializable {
 	public Set<Player> getRoster() {
 		return players;
 	}
-
 	
 	// Setters
 	public void setTeamID(Integer teamId) {

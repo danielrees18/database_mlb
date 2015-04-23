@@ -14,11 +14,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+/**
+ * Daniel Rees
+ * Andrei Popa
+ * Database CS3610 Final Project
+ *
+ */
 @Entity(name = "player")
 public class Player {
 	@Id
@@ -35,6 +42,7 @@ public class Player {
 	@Fetch(FetchMode.JOIN)
 	Set<PlayerSeason> seasons = new HashSet<PlayerSeason>();
 	
+	@ManyToMany(mappedBy="players")
 	Set<TeamSeason> teamSeasons = new HashSet<TeamSeason>();
 	
 	@Column

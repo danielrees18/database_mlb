@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,17 +21,30 @@ import bo.Team;
 import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
+
+/**
+ * Daniel Rees
+ * Andrei Popa
+ * Database CS3610 Final Project
+ *
+ */
 public class Convert {
 
 	static Connection conn;
-	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.128:3306/mlb?user=hostComp&password=password"; 
+
+	static final String MYSQL_CONN_URL = "jdbc:mysql://172.16.107.141:3306/mlb?user=susie&password=password";
+//	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.130:3306/mlb?user=j&password=password"; 
+	static HashMap<String, Team> teams = new HashMap<String, Team>();
+	
 	public static void main(String[] args) {
 		System.out.println("Starting Connection to databases");
 		try {
 			long startTime = System.currentTimeMillis();
 			conn = DriverManager.getConnection(MYSQL_CONN_URL);
-//			convertPlayers();
-			convertTeams();
+			
+			// Execute the conversion process
+			startConversion();
+			
 			long endTime = System.currentTimeMillis();
 			long elapsed = (endTime - startTime) / (1000*60);
 			System.out.println("Elapsed time in mins: " + elapsed);
@@ -45,37 +59,46 @@ public class Convert {
 		}
 		HibernateUtil.getSessionFactory().close();
 	}
+	
+	private static void startConversion() {
+		convertTeams();
+//		convertPlayers();
+		persistTeams();
+	}
 
-	public static void convertTeams() {
+	private static void convertTeams() {
 		try {
 			String sql = Team.SQL_SELECT_TEAM;
 			PreparedStatement ps = conn.prepareStatement(sql);
 			ResultSet rs = ps.executeQuery();
 			
-			int count=0; // for progress feedback only
 			while(rs.next()) {
-				count++;
-				// this just gives us some progress feedback
-				if (count % 100 == 0) System.out.println("num teams: " + count);
-				
-				
 				String teamID = rs.getString("teamID");
+				Team team = teams.get(teamID);
+				if(team == null) {
+					team = new Team(rs);
+				}
 				
-				// Data scrubbing of teams without IDs. Should never happen.
-				if (teamID == null) { continue; }
-				Team team = new Team(rs);
-				// Add all seasons to a team
 				addTeamSeasons(team, teamID);
-			
-				// Persist team to DB after it has been scraped from MySQL db
-				HibernateUtil.persistTeam(team);
+				teams.put(teamID, team);
 			}
 
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+	
+	private static void persistTeams() {
+		System.out.println("Persisting teams");
+		// Persist team to DB after it has been scraped from MySQL db
+		int count = 0;
+		for(String id : teams.keySet()) {
+			count++;
+			// this just gives us some progress feedback
+			if (count % 10 == 0) System.out.println("num teams persisted: " + count);
+			HibernateUtil.persistTeam(teams.get(id));
 		}
 	}
 	
@@ -86,7 +109,10 @@ public class Convert {
 			ps.setString(1, tid);
 			
 			ResultSet rs = ps.executeQuery();
+			int count=0; // for progress feedback only
 			while(rs.next()) {
+				count++;
+				if (count % 1000 == 0) System.out.println("num team seasons: " + count);
 				
 				int seasonYear = rs.getInt("yearID");
 				TeamSeason season = team.getTeamSeason(seasonYear);
@@ -102,6 +128,7 @@ public class Convert {
 					}
 					
 					if (rs.isLast()) {
+						team.setName(rs.getString("name"));
 						team.setYearLast(season.getYear());
 					}
 				}
@@ -134,9 +161,9 @@ public class Convert {
 						"birthState, " + 
 						"debut, " + 
 						"finalGame " +
-//						"from Master");
+						"from Master");
 //						 for debugging comment previous line, uncomment next line
-						"from Master where playerID = 'bondsba01' or playerID = 'youklke01';");
+//						"from Master where playerID = 'beeched01';");// or playerID = 'youklke01';");
 			ResultSet rs = ps.executeQuery();
 			int count=0; // for progress feedback only
 			while (rs.next()) {
@@ -183,7 +210,6 @@ public class Convert {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 	
 	private static java.util.Date convertIntsToDate(int year, int month, int day) {
@@ -237,6 +263,18 @@ public class Convert {
 				// it is possible to see more than one of these per player if he switched teams
 				// set all of these attrs the first time we see this playerseason
 				if (s==null) {
+					
+					/**
+					 * Here we are setting the relation of teamseasonplayer
+					 */
+					String tid = rs.getString("teamID");
+					Team team = teams.get(tid);
+					if(team != null) {
+						TeamSeason ts = team.getTeamSeason(yid);
+						ts.addPlayerToRoster(p);
+						p.addTeamSeason(ts);
+					}
+					
 					s = new PlayerSeason(p,yid);
 					p.addSeason(s);
 					s.setGamesPlayed(rs.getInt("gamesPlayed"));
