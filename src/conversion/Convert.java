@@ -32,8 +32,8 @@ public class Convert {
 
 	static Connection conn;
 
-	static final String MYSQL_CONN_URL = "jdbc:mysql://172.16.107.141:3306/mlb?user=susie&password=password";
-//	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.128:3306/mlb?user=hostComp&password=password";
+//	static final String MYSQL_CONN_URL = "jdbc:mysql://172.16.107.141:3306/mlb?user=susie&password=password";
+	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.128:3306/mlb?user=hostComp&password=password";
 	static HashMap<String, Team> teams = new HashMap<String, Team>();
 	
 	public static void main(String[] args) {
