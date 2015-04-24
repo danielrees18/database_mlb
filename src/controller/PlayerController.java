@@ -9,6 +9,8 @@ import view.PlayerView;
 import bo.Player;
 import bo.PlayerCareerStats;
 import bo.PlayerSeason;
+import bo.Team;
+import bo.TeamSeason;
 import dataaccesslayer.HibernateUtil;
 
 public class PlayerController extends BaseController {
@@ -97,6 +99,10 @@ public class PlayerController extends BaseController {
     	Set<String> positions = p.getPositions();
     	List<PlayerSeason> list = new ArrayList<PlayerSeason>(seasons);
     	Collections.sort(list, PlayerSeason.playerSeasonsComparator);
+    	
+    	Set<TeamSeason> tSeasons = p.getTeamSeasons();
+    	List<TeamSeason> ts = new ArrayList<TeamSeason>(tSeasons);
+    	Collections.sort(ts, TeamSeason.teamSeasonsComparator);
     	// build 2 tables.  first the player details, then the season details
         // need a row for the table headers
         String[][] playerTable = new String[2][6];
@@ -125,24 +131,34 @@ public class PlayerController extends BaseController {
         
         view.buildTable(playerTable);
         // now for seasons
-        String[][] seasonTable = new String[seasons.size()+1][7];
+        String[][] seasonTable = new String[seasons.size()+1][8];
         seasonTable[0][0] = "Year";
         seasonTable[0][1] = "Games Played";
         seasonTable[0][2] = "Salary";
-        seasonTable[0][3] = "Hits";
-        seasonTable[0][4] = "At Bats";
-        seasonTable[0][5] = "Batting Average";
-        seasonTable[0][6] = "Home Runs";
-        int i = 0;
-        for (PlayerSeason ps: list) {
-        	i++;
-        	seasonTable[i][0] = ps.getYear().toString();
-        	seasonTable[i][1] = ps.getGamesPlayed().toString();
-        	seasonTable[i][2] = DOLLAR_FORMAT.format(ps.getSalary());
-        	seasonTable[i][3] = ps.getBattingStats().getHits().toString();
-        	seasonTable[i][4] = ps.getBattingStats().getAtBats().toString();
-        	seasonTable[i][5] = DOUBLE_FORMAT.format(ps.getBattingAverage());
-        	seasonTable[i][6] = ps.getBattingStats().getHomeRuns().toString();
+        seasonTable[0][3] = "Team(s)";
+        seasonTable[0][4] = "Hits";
+        seasonTable[0][5] = "At Bats";
+        seasonTable[0][6] = "Batting Average";
+        seasonTable[0][7] = "Home Runs";
+        
+        for (int i = 0; i < ts.size(); i++) {
+        	int tid = ts.get(i).getTeamID();
+        	Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(tid));
+        	System.out.println(t.getName() + " " + ts.get(i).getYear());
+        }
+        
+        for (int i = 0; i < list.size(); i++) {
+        	PlayerSeason ps = list.get(i);
+        	int tid = ts.get(i).getTeamID();
+        	Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(tid));
+        	seasonTable[i+1][0] = ps.getYear().toString();
+        	seasonTable[i+1][1] = ps.getGamesPlayed().toString();
+        	seasonTable[i+1][2] = DOLLAR_FORMAT.format(ps.getSalary());
+        	seasonTable[i+1][3] = view.encodeLink(new String[]{"id"}, new String[]{String.valueOf(tid)}, t.getName(), ACT_DETAIL, SSP_TEAM);
+        	seasonTable[i+1][4] = ps.getBattingStats().getHits().toString();
+        	seasonTable[i+1][5] = ps.getBattingStats().getAtBats().toString();
+        	seasonTable[i+1][6] = DOUBLE_FORMAT.format(ps.getBattingAverage());
+        	seasonTable[i+1][7] = ps.getBattingStats().getHomeRuns().toString();
         }
         view.buildTable(seasonTable);
     }

@@ -62,6 +62,8 @@ public class Team implements Serializable {
 		}
 	}
 	
+	public Team() {}
+	
 	// Public Methods
 	@Override
 	public int hashCode() {

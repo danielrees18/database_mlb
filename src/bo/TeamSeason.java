@@ -3,6 +3,7 @@ package bo;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,12 +37,14 @@ public class TeamSeason implements Serializable {
 	 * primary key of the TeamSeason entity set
 	 */
 	@Embeddable
-	protected class TeamSeasonId implements Serializable {
+	static class TeamSeasonId implements Serializable {
 		@ManyToOne
 		@JoinColumn(name = "teamId", referencedColumnName = "teamId", insertable = false, updatable = false)
 		Team team;
 		@Column(name="year")
 		Integer yearId;
+		
+		public TeamSeasonId() {}
 		
 		public TeamSeasonId(Team team, Integer yr) {
 			this.team = team;
@@ -98,6 +101,8 @@ public class TeamSeason implements Serializable {
 	
 	
 	// Constructors
+	public TeamSeason() {}
+	
 	public TeamSeason(ResultSet rs, Team team) {
 		try {
 			id = new TeamSeasonId(team, rs.getInt("yearID"));
@@ -210,4 +215,14 @@ public class TeamSeason implements Serializable {
 	public void setRoster(Set<Player> players) {
 		this.players = players;
 	}
+	
+	public static Comparator<TeamSeason> teamSeasonsComparator = new Comparator<TeamSeason>() {
+
+		public int compare(TeamSeason ps1, TeamSeason ps2) {
+			Integer year1 = ps1.getYear();
+			Integer year2 = ps2.getYear();
+			return year1.compareTo(year2);
+		}
+
+	};
 }
