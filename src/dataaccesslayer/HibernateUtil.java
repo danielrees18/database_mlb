@@ -11,6 +11,7 @@ import org.hibernate.cfg.Configuration;
 
 import bo.Player;
 import bo.Team;
+import bo.TeamSeason;
 
 /**
  * Daniel Rees
@@ -108,7 +109,7 @@ public class HibernateUtil {
 		try {
 			tx.begin();
 			org.hibernate.Query query;
-			query = session.createQuery("from bo.Player where id = :id ");
+			query = session.createQuery("from bo.Team where id = :id ");
 		    query.setParameter("id", id);
 		    if (query.list().size()>0) {
 		    	t = (Team) query.list().get(0);
@@ -157,9 +158,9 @@ public class HibernateUtil {
 		try {
 			tx.begin();
 			org.hibernate.Query query;
-			query = session.createQuery("from bo.TeamSeason where id = :id and year = :year ");
-		    query.setParameter("id", idQuery);
-		    query.setParameter("year", yearQuery);
+			query = session.createQuery("from bo.TeamSeason where teamId = :id and year = :year ");
+		    query.setParameter("id", Integer.valueOf(idQuery));
+		    query.setParameter("year", Integer.valueOf(yearQuery));
 		    list = query.list();
 			tx.commit();
 		} catch (Exception e) {
@@ -194,7 +195,7 @@ public class HibernateUtil {
 	public static boolean persistTeam(Team t) {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Transaction tx = session.getTransaction();
-		try {
+		try {System.out.println("here: persistTeam");
 			tx.begin();
 			session.save(t);
 			tx.commit();

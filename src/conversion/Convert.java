@@ -62,7 +62,7 @@ public class Convert {
 	
 	private static void startConversion() {
 		convertTeams();
-//		convertPlayers();
+		convertPlayers();
 		persistTeams();
 	}
 

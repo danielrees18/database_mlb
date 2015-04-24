@@ -17,6 +17,8 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
+import bo.PlayerSeason.PlayerSeasonId;
+
 /**
  * Daniel Rees
  * Andrei Popa
@@ -37,12 +39,14 @@ public class TeamSeason implements Serializable {
 	 * primary key of the TeamSeason entity set
 	 */
 	@Embeddable
-	protected class TeamSeasonId implements Serializable {
+	static class TeamSeasonId implements Serializable {
 		@ManyToOne
 		@JoinColumn(name = "teamId", referencedColumnName = "teamId", insertable = false, updatable = false)
 		Team team;
 		@Column(name="year")
 		Integer yearId;
+		
+		public TeamSeasonId() {}
 		
 		public TeamSeasonId(Team team, Integer yr) {
 			this.team = team;
@@ -99,6 +103,8 @@ public class TeamSeason implements Serializable {
 	
 	
 	// Constructors
+	public TeamSeason() {}
+	
 	public TeamSeason(ResultSet rs, Team team) {
 		try {
 			id = new TeamSeasonId(team, rs.getInt("yearID"));

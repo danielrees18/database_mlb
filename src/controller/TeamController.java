@@ -1,5 +1,6 @@
 package controller;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,13 +68,13 @@ public class TeamController extends BaseController {
 	//***make it get the right thing
 	protected final void processRoster() {
         String id = keyVals.get("id");
-        String year = keyVals.get("year");
+        String year = keyVals.get("year"); 
         if (id == null) {
             return;
         }
-        TeamSeason ts = (TeamSeason) HibernateUtil.retrieveTeamSeasonByTeamIdAndYear(id, year);
+        List<TeamSeason> ts = new ArrayList<TeamSeason>(HibernateUtil.retrieveTeamSeasonByTeamIdAndYear(id, year));
         if (ts == null) return;
-        buildSearchResultsTableTeamRoster(ts);
+        buildSearchResultsTableTeamRoster(ts.get(0));
         view.buildLinkToSearch();
     }
 	
@@ -120,10 +121,10 @@ public class TeamController extends BaseController {
         seasonTable[0][0] = "Year";
         seasonTable[0][1] = "Games Played";
         seasonTable[0][2] = "Roster";
-        seasonTable[0][2] = "Wins";
-        seasonTable[0][3] = "Losses";
-        seasonTable[0][4] = "Rank";
-        seasonTable[0][5] = "Attendance";
+        seasonTable[0][3] = "Wins";
+        seasonTable[0][4] = "Losses";
+        seasonTable[0][5] = "Rank";
+        seasonTable[0][6] = "Attendance";
         
         int i = 0;
         for (TeamSeason ts: list) {
@@ -136,7 +137,7 @@ public class TeamController extends BaseController {
         	seasonTable[i][3] = ts.getGamesWon().toString();
         	seasonTable[i][4] = ts.getGamesLost().toString();
         	seasonTable[i][5] = ts.getTeamRank().toString();
-        	seasonTable[i][6] = ts.getTotalAttendance().toString();
+        	seasonTable[i][6] = INTEGER_FORMAT.format(ts.getTotalAttendance());
         }
         view.buildTable(seasonTable);
     }
