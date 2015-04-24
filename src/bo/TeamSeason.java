@@ -17,8 +17,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 
-import bo.PlayerSeason.PlayerSeasonId;
-
 /**
  * Daniel Rees
  * Andrei Popa

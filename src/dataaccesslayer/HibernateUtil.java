@@ -65,6 +65,7 @@ public class HibernateUtil {
 		    if (query.list().size()>0) {
 		    	p = (Player) query.list().get(0);
 		    	Hibernate.initialize(p.getSeasons());
+		    	Hibernate.initialize(p.getTeamSeasons());
 		    }
 			tx.commit();
 		} catch (Exception e) {
@@ -150,9 +151,8 @@ public class HibernateUtil {
 		return list;
 	}
 	
-	@SuppressWarnings("unchecked") // ***need to make sure query is correct. Check columns in db
-	public static List<Team> retrieveTeamSeasonByTeamIdAndYear(String idQuery, String yearQuery) {
-        List<Team> list=null;
+	public static TeamSeason retrieveTeamSeason(String idQuery, String yearQuery) {
+        TeamSeason ts=null;
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Transaction tx = session.getTransaction();
 		try {
@@ -161,7 +161,10 @@ public class HibernateUtil {
 			query = session.createQuery("from bo.TeamSeason where teamId = :id and year = :year ");
 		    query.setParameter("id", Integer.valueOf(idQuery));
 		    query.setParameter("year", Integer.valueOf(yearQuery));
-		    list = query.list();
+		    if (query.list().size()>0) {
+		    	ts = (TeamSeason) query.list().get(0);
+		    	Hibernate.initialize(ts.getRoster());
+		    }
 			tx.commit();
 		} catch (Exception e) {
 			tx.rollback();
@@ -169,7 +172,7 @@ public class HibernateUtil {
 		} finally {
 			if (session.isOpen()) session.close();
 		}
-		return list;
+		return ts;
 	}
 	
 	/*

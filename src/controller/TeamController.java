@@ -1,6 +1,5 @@
 package controller;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,13 +67,14 @@ public class TeamController extends BaseController {
 	//***make it get the right thing
 	protected final void processRoster() {
         String id = keyVals.get("id");
-        String year = keyVals.get("year"); 
+        String year = keyVals.get("year");
         if (id == null) {
             return;
         }
-        List<TeamSeason> ts = new ArrayList<TeamSeason>(HibernateUtil.retrieveTeamSeasonByTeamIdAndYear(id, year));
+        TeamSeason ts = HibernateUtil.retrieveTeamSeason(id, year);
+        
         if (ts == null) return;
-        buildSearchResultsTableTeamRoster(ts.get(0));
+        buildSearchResultsTableTeamRoster(ts, id, year);
         view.buildLinkToSearch();
     }
 	
@@ -143,12 +143,11 @@ public class TeamController extends BaseController {
     }
     
     // ***needs to be changed
-    private void buildSearchResultsTableTeamRoster(TeamSeason ts) { 
-    	Set<Player> roster = ts.getRoster();
-    	List<Player> list = new ArrayList<Player>(roster);
+    private void buildSearchResultsTableTeamRoster(TeamSeason ts, String id, String year) {    	
+    	Set<Player> players = ts.getRoster(); 
+    	List<Player> roster = new ArrayList<Player>(players);
     	
-    	String year = ts.getYear().toString();
-    	int tid = ts.getTeamID();
+    	int tid = Integer.valueOf(id);
     	Team t = (Team) HibernateUtil.retrieveTeamById(tid);
     	// build 2 tables.  first the team details, then the season details
         // need a row for the table headers
@@ -160,37 +159,31 @@ public class TeamController extends BaseController {
         teamTable[1][0] = t.getName();
         teamTable[1][1] = t.getLeague();
         teamTable[1][2] = year;
-        teamTable[1][3] = null; // what is this? sum of all salaries?
         
-        view.buildTable(teamTable);
+        
         // now for seasons
-        String[][] playersTable = new String[roster.size()+1][3];
+        int numPlayers = roster.size();
+        String[][] playersTable = new String[numPlayers+1][3];
         playersTable[0][0] = "Name";
         playersTable[0][1] = "Games Played";
-        playersTable[0][2] = "Player Payroll";
-        
+        playersTable[0][2] = "Salary";
+        System.out.println("HERE: " + roster.size());
         int i = 0;
-        for (Player p: list) {
+        double payroll = 0;
+        for (Player p: roster) {
         	i++;
-        	PlayerSeason ps = findPS(p, year);
+        	PlayerSeason ps = p.getPlayerSeason(Integer.valueOf(year));
         	String name = p.getName();
         	String pid = p.getId().toString();
+        	double salary = ps.getSalary();
         	playersTable[i][0] = view.encodeLink(new String[]{"id"}, new String[]{pid}, name, ACT_DETAIL, SSP_PLAYER);
         	playersTable[i][1] = ps.getGamesPlayed().toString();
-        	playersTable[i][2] = DOLLAR_FORMAT.format(ps.getSalary());
+        	playersTable[i][2] = DOLLAR_FORMAT.format(salary);
+        	payroll += salary;
         }
+        
+        teamTable[1][3] = DOLLAR_FORMAT.format(payroll);;
+        view.buildTable(teamTable);
         view.buildTable(playersTable);
-    }
-    
-    private PlayerSeason findPS(Player p, String year) {
-    	Set<PlayerSeason> seasons = p.getSeasons();
-    	List<PlayerSeason> list = new ArrayList<PlayerSeason>(seasons);
-    	
-    	for (PlayerSeason ps: list) {
-        	if (ps.getYear() == Integer.valueOf(year)) {
-        		return ps;
-        	}
-        }
-    	return null;
     }
 }
