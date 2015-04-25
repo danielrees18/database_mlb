@@ -151,7 +151,7 @@ public class PlayerController extends BaseController {
         	seasonTable[i+1][0] = ps.getYear().toString();
         	seasonTable[i+1][1] = ps.getGamesPlayed().toString();
         	seasonTable[i+1][2] = DOLLAR_FORMAT.format(ps.getSalary());
-        	seasonTable[i+1][3] = teams; //view.encodeLink(new String[]{"id"}, new String[]{String.valueOf(tid)}, t.getName(), ACT_DETAIL, SSP_TEAM);
+        	seasonTable[i+1][3] = teams; 
         	seasonTable[i+1][4] = ps.getBattingStats().getHits().toString();
         	seasonTable[i+1][5] = ps.getBattingStats().getAtBats().toString();
         	seasonTable[i+1][6] = DOUBLE_FORMAT.format(ps.getBattingAverage());
