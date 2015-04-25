@@ -198,7 +198,7 @@ public class HibernateUtil {
 	public static boolean persistTeam(Team t) {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Transaction tx = session.getTransaction();
-		try {System.out.println("here: persistTeam");
+		try {
 			tx.begin();
 			session.save(t);
 			tx.commit();

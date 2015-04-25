@@ -131,6 +131,7 @@ public class PlayerController extends BaseController {
         
         view.buildTable(playerTable);
         // now for seasons
+        
         String[][] seasonTable = new String[seasons.size()+1][8];
         seasonTable[0][0] = "Year";
         seasonTable[0][1] = "Games Played";
@@ -141,26 +142,56 @@ public class PlayerController extends BaseController {
         seasonTable[0][6] = "Batting Average";
         seasonTable[0][7] = "Home Runs";
         
-        for (int i = 0; i < ts.size(); i++) {
-        	int tid = ts.get(i).getTeamID();
-        	Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(tid));
-        	System.out.println(t.getName() + " " + ts.get(i).getYear());
-        }
-        
         for (int i = 0; i < list.size(); i++) {
         	PlayerSeason ps = list.get(i);
-        	int tid = ts.get(i).getTeamID();
-        	Team t = (Team) HibernateUtil.retrieveTeamById(Integer.valueOf(tid));
+        	
+        	// Create a list of all teams a player played for during a season;
+        	String teams = generateEncodedLinkForTeams(ps, ts);
+        	
         	seasonTable[i+1][0] = ps.getYear().toString();
         	seasonTable[i+1][1] = ps.getGamesPlayed().toString();
         	seasonTable[i+1][2] = DOLLAR_FORMAT.format(ps.getSalary());
-        	seasonTable[i+1][3] = view.encodeLink(new String[]{"id"}, new String[]{String.valueOf(tid)}, t.getName(), ACT_DETAIL, SSP_TEAM);
+        	seasonTable[i+1][3] = teams; //view.encodeLink(new String[]{"id"}, new String[]{String.valueOf(tid)}, t.getName(), ACT_DETAIL, SSP_TEAM);
         	seasonTable[i+1][4] = ps.getBattingStats().getHits().toString();
         	seasonTable[i+1][5] = ps.getBattingStats().getAtBats().toString();
         	seasonTable[i+1][6] = DOUBLE_FORMAT.format(ps.getBattingAverage());
         	seasonTable[i+1][7] = ps.getBattingStats().getHomeRuns().toString();
         }
         view.buildTable(seasonTable);
+    }
+    
+    
+	// Find each team that this player played for during the current PlayerSeason based off of year.
+	// Create a link to each of the teams and add them to a string, separating them with a comma.
+    private String generateEncodedLinkForTeams(PlayerSeason season, List<TeamSeason> ts) {
+    	String teamOutput = "";
+    	
+    	ArrayList<Team> teams = getTeamsByYear(ts, season.getYear());
+    	for(Team t : teams) {
+    		teamOutput += view.encodeLink(new String[]{"id"}, new String[]{String.valueOf(t.getTeamID())}, t.getName(), ACT_DETAIL, SSP_TEAM);
+
+    		// If there is more than 1 team, and the current team is not the last team in the array, then add a comma
+    		if(teams.size() > 1 && t.getTeamID() != teams.get(teams.size()-1).getTeamID()) {
+    			teamOutput +=", ";
+    		}
+    	}
+    	
+    	return teamOutput;
+    }
+    
+    // Creates an array of Teams based on a player season's given year
+    private ArrayList<Team> getTeamsByYear(List<TeamSeason> seasons, int year) {
+    	ArrayList<Team> teams = new ArrayList<Team>();
+    	
+    	for(TeamSeason season : seasons) {
+    		if (year == season.getYear()) {
+    			int tid = season.getTeamID();
+    			Team team = (Team) HibernateUtil.retrieveTeamById(tid);
+    			teams.add(team);
+			}
+    	}
+    	
+    	return teams;
     }
 
 }

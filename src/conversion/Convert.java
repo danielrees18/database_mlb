@@ -32,8 +32,8 @@ public class Convert {
 
 	static Connection conn;
 
-//	static final String MYSQL_CONN_URL = "jdbc:mysql://172.16.107.141:3306/mlb?user=susie&password=password";
-	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.128:3306/mlb?user=hostComp&password=password";
+	static final String MYSQL_CONN_URL = "jdbc:mysql://172.16.107.141:3306/mlb?user=susie&password=password";
+//	static final String MYSQL_CONN_URL = "jdbc:mysql://192.168.129.128:3306/mlb?user=hostComp&password=password";
 
 	static HashMap<String, Team> teams = new HashMap<String, Team>();
 	
@@ -162,9 +162,9 @@ public class Convert {
 						"birthState, " + 
 						"debut, " + 
 						"finalGame " +
-						"from Master");
+//						"from Master");
 //						 for debugging comment previous line, uncomment next line
-//						"from Master where playerID = 'beeched01';");// or playerID = 'youklke01';");
+						"from Master where playerID = 'rosepe01';");// or playerID = 'youklke01';");
 			ResultSet rs = ps.executeQuery();
 			int count=0; // for progress feedback only
 			while (rs.next()) {
@@ -268,13 +268,13 @@ public class Convert {
 					/**
 					 * Here we are setting the relation of teamseasonplayer
 					 */
-					String tid = rs.getString("teamID");
-					Team team = teams.get(tid);
-					if(team != null) {
-						TeamSeason ts = team.getTeamSeason(yid);
-						ts.addPlayerToRoster(p);
-						p.addTeamSeason(ts);
-					}
+//					String tid = rs.getString("teamID");
+//					Team team = teams.get(tid);
+//					if(team != null) {
+//						TeamSeason ts = team.getTeamSeason(yid);
+//						ts.addPlayerToRoster(p);
+//						p.addTeamSeason(ts);
+//					}
 					
 					s = new PlayerSeason(p,yid);
 					p.addSeason(s);
@@ -293,6 +293,15 @@ public class Convert {
 				} else {
 					s.setGamesPlayed(rs.getInt("gamesPlayed")+s.getGamesPlayed());
 				}
+				
+				String tid = rs.getString("teamID");
+				Team team = teams.get(tid);
+				if(team != null) {
+					TeamSeason ts = team.getTeamSeason(yid);
+					ts.addPlayerToRoster(p);
+					p.addTeamSeason(ts);
+				}
+				
 			}
 			rs.close();
 			ps.close();
