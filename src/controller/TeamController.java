@@ -142,7 +142,6 @@ public class TeamController extends BaseController {
         view.buildTable(seasonTable);
     }
     
-    // ***needs to be changed
     private void buildSearchResultsTableTeamRoster(TeamSeason ts, String id, String year) {    	
     	Set<Player> players = ts.getRoster(); 
     	List<Player> roster = new ArrayList<Player>(players);

@@ -19,24 +19,29 @@ public abstract class BaseView {
         StringBuilder sb = new StringBuilder();
         sb.append("<!DOCTYPE html>\r\n");
         sb.append("<HTML>\r\n");
-        sb.append("<HEAD><TITLE>");
+        sb.append("<HEAD><TITLE>MLB -");
         sb.append(title);
-        sb.append("</TITLE></HEAD>\r\n");
-        sb.append("<BODY>\r\n");
-        sb.append("<h2>MLB - ");
-        sb.append(title);
-        sb.append("</h2>\r\n");
+        sb.append("</TITLE>\r\n");
+        sb.append("<link rel=\"stylesheet\" href=\"css/styles.css\" type=\"text/css\">\r\n");
+        sb.append("</HEAD>\r\n");
+        if (title.equals("Player")) {
+        	sb.append("<BODY style=\"background-image:url(/images/player.jpg)\">\r\n");
+        } else {
+        	sb.append("<BODY style=\"background-image:url(/images/teams.jpg)\">\r\n");
+        }
+        sb.append("<div class=\"main\">\r\n");
         sb.append(body);
-        sb.append("<br/><br/>\r\n");
-        sb.append("<a href=\"index.htm\">Home</a>\r\n");
+        sb.append("<div class=\"home\">\r\n");
+        sb.append("<a class=\"btn\" href=\"index.htm\">Home</a>\r\n");
+        sb.append("</div>\r\n");
+        sb.append("</div>\r\n");
         sb.append("</BODY>\r\n");
         sb.append("</HTML>\r\n");
         return sb.toString();
     }
     
     public final void buildLinkToSearch() {
-        body.append("<br/><br/>\r\n");
-        body.append("<a href=\"");
+        body.append("<a class=\"btn\" href=\"");
         body.append(title.toLowerCase());
         body.append(".ssp?action=searchform\">Search for a ");
         body.append(title);
@@ -50,7 +55,7 @@ public abstract class BaseView {
     }
     
     public final void printSearchResultsMessage(String name, boolean exact) {
-        body.append("<p>");
+        body.append("<p style=\"margin-top: 30px\">");
         body.append(title);
         if (exact) {
             body.append("s with name matching '");
@@ -63,15 +68,16 @@ public abstract class BaseView {
     }
 
     public final void buildTable(String[][] table) {
-        body.append("<table border=1>\r\n");
+    	body.append("<div class=\"table\">\r\n");
+        body.append("<table>\r\n");
         // print table header row
-        body.append("<tr>");
+        body.append("<thead><tr>");
         for (int i = 0; i < table[0].length; i++) {
             body.append("<th>");
             body.append(table[0][i]);
             body.append("</th>\r\n");
         }
-        body.append("</tr>\r\n");
+        body.append("</thead></tr>\r\n");
         // print table rows
         for (int row = 1; row < table.length; row++) {
             body.append("<tr>\r\n");
@@ -83,6 +89,7 @@ public abstract class BaseView {
             body.append("</tr>\r\n");
         }
         body.append("</table>\r\n");
+        body.append("</div>\r\n");
     }
     
     /** 
