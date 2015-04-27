@@ -13,7 +13,7 @@
 
 <!-- WINDOWS -->
 <!-- <property name="hibernate.connection.url">jdbc:sqlserver://192.168.129.130:1433;database=MLB</property>
-<property name="hibernate.connection.username">j</property> -->
+<property name="hibernate.connection.username">j</property>  -->
 
 <property name="hibernate.connection.password">password</property>
 <property name="hibernate.connection.pool_size">1</property>
