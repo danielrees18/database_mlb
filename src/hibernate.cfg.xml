@@ -8,7 +8,7 @@
 <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
 
 <!-- LINUX -->
-<property name="hibernate.connection.url">jdbc:sqlserver://172.16.107.136:1433;database=MLB</property>
+<property name="hibernate.connection.url">jdbc:sqlserver://172.16.107.143:1433;database=MLB</property>
 <property name="hibernate.connection.username">susie</property>
 
 <!-- WINDOWS -->
